@@ -14,3 +14,42 @@ jobs:
           name: dockerfile-shebang
           path: dockerfile-shebang
           if-no-files-found: error
+
+      - name: Extract release notes
+        id: release_notes
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.release_notes.outputs.release_notes }}
+          files: dockerfile-shebang
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#      - name: Get version
+#        id: get_version
+#        if: startsWith(github.ref, 'refs/tags/')
+#        run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+#
+#      - name: Set SHA
+#        id: shasum
+#        if: startsWith(github.ref, 'refs/tags/')
+#        run: echo ::set-output name=sha::"$(shasum -a 256 dockerfile-shebang | awk '{printf $1}')"
+#
+#      - name: Bump Brew
+#        if: startsWith(github.ref, 'refs/tags/')
+#        env:
+#          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GH_HOMEBREW_TOKEN }}
+#        run: |
+#          git config --global user.email "41898282+github-actions@users.noreply.github.com"
+#          git config --global user.name "github-actions"
+#          # Update to ensure we have the latest version which supports arbitrary default branches.
+#          brew update
+#          brew tap JakeWharton/repo
+#          brew bump-formula-pr -f --version=${{ steps.get_version.outputs.version }} --no-browse --no-audit \
+#            --sha256=${{ steps.shasum.outputs.sha }} \
+#            --url="https://github.com/JakeWharton/dockerfile-shebang/releases/download/${{ steps.get_version.outputs.version }}/dockerfile-shebang" \
+#            JakeWharton/repo/dockerfile-shebang
