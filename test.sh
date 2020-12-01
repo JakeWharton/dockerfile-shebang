@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
+# https://stackoverflow.com/a/4774063/132047
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
 success=0
 failures=0
-for d in fixtures/*/; do
+for d in "$SCRIPTPATH"/fixtures/*/; do
   echo -n "$(basename "$d")… "
 
-  diff=$(diff -U 0 "$d""expected.txt" <(./dockerfile-shebang "$d""test.dockerfile" $(< "$d""args.txt")))
+  diff=$(diff -U 0 "$d""expected.txt" <(PATH="$SCRIPTPATH":$PATH "$d""test.dockerfile" $(< "$d""args.txt")))
 
   if [[ $? == 0 ]]; then
     echo "✅"
