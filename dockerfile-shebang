@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if [ "$#" -eq 0 ]; then
   echo "Usage: #!/usr/bin/env dockerfile-shebang"
@@ -8,6 +8,31 @@ fi
 set -e
 
 NAME=$(basename "$1")
-docker build -t "$NAME" - < "$1" > /dev/null
+
+# Display a message if the container needs built. Currently we have no way
+# of determining this case. For now, delay echoing the message by 1 second and
+# cancel it if the 'docker build' command returns quickly indicating a cached
+# build (or a build which was so fast that it doesn't matter).
+# TODO replace with https://github.com/moby/moby/issues/38101 once it ships.
+delayed_build_message() {
+  sleep 1
+  echo "Building $NAME..."
+  echo
+}
+
+delayed_build_message &
+MESSAGE_PID=$!
+disown $MESSAGE_PID # Avoid output when we kill this job.
+
+kill_delayed_message() {
+  # Ensure this cannot fail and kill the enclosing script.
+  kill $MESSAGE_PID > /dev/null 2>&1 || true
+}
+trap kill_delayed_message EXIT
+
+docker build --label "dockerfile-shebang=true" -t "$NAME" - < "$1" > /dev/null
+
+kill_delayed_message
+
 shift # Remove script name from arguments
-docker run --rm --name "$NAME" "$NAME" $@
+exec docker run --rm --name "$NAME" "$NAME" $@
