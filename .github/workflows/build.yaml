@@ -3,8 +3,14 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: ./test.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dockerfile-shebang
+          path: dockerfile-shebang
+          if-no-files-found: error
