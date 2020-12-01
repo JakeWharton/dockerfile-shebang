@@ -4,7 +4,7 @@ Treat your Dockerfiles as self-contained, editable scripts.
 
 ```
 $ cat test.dockerfile
-#!/bin/dockerfile-shebang
+#!/usr/bin/env dockerfile-shebang
 
 FROM alpine:latest
 ENTRYPOINT ["echo"]
@@ -14,9 +14,24 @@ $ ./test.dockerfile hello, world!
 hello, world!
 ```
 
+## Install
 
-License
--------
+**Mac OS**
+
+```
+$ brew install JakeWharton/repo/dockerfile-shebang
+```
+
+**Other**
+
+Download `dockerfile-shebang` script from
+[latest release](https://github.com/JakeWharton/dockerfile-shebang/releases/latest).
+Run `chmod +x dockerfile-shebang` and drop into a folder which is on your `$PATH`.
+
+Want to maintain a Linux distro installation? Please do! PRs for distro installation welcome.
+
+
+# License
 
     Copyright 2020 Jake Wharton
 
