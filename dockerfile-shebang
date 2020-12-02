@@ -9,16 +9,16 @@ DOCKERFILE_PATH="$1"
 DOCKERFILE_NAME=$(basename "$DOCKERFILE_PATH")
 shift # Remove Dockerfile from arguments
 
-DOCKER_ARGS=""
-CONTAINER_ARGS="$@"
+declare -a DOCKER_ARGS=()
+CONTAINER_ARGS=("$@")
 
 # Look for -- as an argument. If found, send arguments before it to Docker and
 # those afterward to the container.
 i=1
 for arg in "$@"; do
   if [[ "$arg" == "--" ]]; then
-    DOCKER_ARGS="${@:1:$(($i - 1))}"
-    CONTAINER_ARGS="${@:$(($i + 1))}"
+    DOCKER_ARGS=("${@:1:$(($i - 1))}")
+    CONTAINER_ARGS=("${@:$(($i + 1))}")
     break
   fi
   i=$((i + 1))
@@ -58,4 +58,4 @@ if [ $BUILD_EXIT -ne 0 ]; then
   exit $BUILD_EXIT
 fi
 
-exec docker run --rm --name "$DOCKERFILE_NAME" $DOCKER_ARGS "$DOCKERFILE_NAME" $CONTAINER_ARGS
+exec docker run --rm --name "$DOCKERFILE_NAME" "${DOCKER_ARGS[@]}" "$DOCKERFILE_NAME" "${CONTAINER_ARGS[@]}"
