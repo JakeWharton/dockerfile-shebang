@@ -10,8 +10,13 @@ FROM alpine:latest
 ENTRYPOINT ["echo"]
 
 $ chmod +x test.dockerfile
-$ ./test.dockerfile hello, world!
-hello, world!
+$ ./test.dockerfile Hello, world!
+Hello, world!
+```
+
+If you need to pass arguments to the underlying `docker run` command, put them before a `--` argument.
+```
+$ ./test.dockerfile --expose 80 -- Hello, world!
 ```
 
 ## Install
