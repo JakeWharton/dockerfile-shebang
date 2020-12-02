@@ -2,6 +2,7 @@
 
 # https://stackoverflow.com/a/4774063/132047
 SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+REPOPATH="$(dirname "$SCRIPTPATH")"
 
 clean_containers() {
   docker images --filter label=dockerfile-shebang --format "{{.Repository}}:{{.Tag}}" | while IFS= read -r -d '' image; do
@@ -12,12 +13,12 @@ clean_containers() {
 
 success=0
 failures=0
-for d in "$SCRIPTPATH"/fixtures/*/; do
+for d in "$SCRIPTPATH"/*/; do
   echo -n "$(basename "$d")… "
 
   clean_containers
 
-  diff=$(diff -U 0 "$d""expected.txt" <(cd "$d" && PATH="$SCRIPTPATH":$PATH "$d""test.sh"))
+  diff=$(diff -U 0 "$d""expected.txt" <(cd "$d" && PATH="$REPOPATH":$PATH "$d""test.sh"))
 
   if [[ $? == 0 ]]; then
     echo "✅"

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: ./test.sh
+      - run: ./test/run.sh
 
       - uses: actions/upload-artifact@v2
         with:
