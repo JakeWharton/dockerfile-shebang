@@ -5,8 +5,6 @@ if [ "$#" -eq 0 ]; then
   exit 1
 fi
 
-set -e
-
 DOCKERFILE_PATH="$1"
 DOCKERFILE_NAME=$(basename "$DOCKERFILE_PATH")
 shift # Remove Dockerfile from arguments
@@ -49,8 +47,15 @@ kill_delayed_message() {
 }
 trap kill_delayed_message EXIT
 
-docker build --label "dockerfile-shebang=true" -t "$DOCKERFILE_NAME" - < "$DOCKERFILE_PATH" > /dev/null
+BUILD_OUTPUT=$(docker build --label "dockerfile-shebang=true" -t "$DOCKERFILE_NAME" - 2>&1 < "$DOCKERFILE_PATH")
+BUILD_EXIT=$?
 
 kill_delayed_message
+
+if [ $BUILD_EXIT -ne 0 ]; then
+  # Display the build output, ignoring the first line about the context.
+  echo "$BUILD_OUTPUT" | tail -n +2
+  exit $BUILD_EXIT
+fi
 
 exec docker run --rm --name "$DOCKERFILE_NAME" $DOCKER_ARGS "$DOCKERFILE_NAME" $CONTAINER_ARGS
